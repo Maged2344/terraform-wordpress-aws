@@ -15,3 +15,10 @@ module "ec2" {
   private_subnet_1a_id = module.networking.private_subnet_1a_id
   db_private_ip        = module.ec2.db_private_ip
 }
+
+# module "cloudflare" {
+#   source            = "./modules/cloudflare"
+#   cloudflare_zone_id = var.cloudflare_zone_id
+#   record_name        = "magedmohamed"
+#   record_value       = module.ec2.load_balancer_dns
+# }

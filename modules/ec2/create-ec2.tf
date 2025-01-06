@@ -10,10 +10,15 @@ resource "aws_launch_template" "maged-wordpress-tf" {
   image_id      = "ami-03558f46c18510eda"
   instance_type = "t2.micro" 
   vpc_security_group_ids = [aws_security_group.maged-wordpress-terraform-sg.id]
-  depends_on = [ aws_instance.private_ec2 ]
   user_data = base64encode(<<-EOF
     #!/bin/bash
-cat > /var/www/html/wordpress/wp-config.php <<WP_EOF
+    cd /var/www/html
+    sudo rm -rf /var/www/html/wordpress
+    git clone https://github.com/Maged2344/wordpress.git
+    sudo chown -R www-data:www-data /var/www/html/wordpress
+    sudo chmod -R 775 /var/www/html/wordpress
+    sudo rm -rf /var/www/html/wordpress/wp-config.php
+    sudo bash -c 'cat > /var/www/html/wordpress/wp-config.php <<EOF
 <?php
 define( "DB_NAME", "wordpress_db" );
 define( "DB_USER", "wp_user" );
@@ -25,8 +30,9 @@ define( "DB_COLLATE", "" );
 if ( !defined("ABSPATH") )
     define("ABSPATH", dirname(__FILE__) . "/");
 require_once(ABSPATH . "wp-settings.php");
-WP_EOF
-
+EOF'
+    nginx -t
+    systemctl daemon-reload
     systemctl restart nginx
   EOF
   )
@@ -88,7 +94,7 @@ resource "aws_autoscaling_group" "maged-autoscaling" {
   launch_template {
     id      = aws_launch_template.maged-wordpress-tf.id
   }
-  min_size                  = 1
+  min_size                  = 2
   max_size                  = 2
   health_check_grace_period = 200
   health_check_type         = "EC2"

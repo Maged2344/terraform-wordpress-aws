@@ -4,6 +4,6 @@ output "db_private_ip" {
 }
 
 output "load_balancer_dns" {
-  value = aws_lb.maged-wordpress-alb.dns_name
+  value       = aws_lb.maged-wordpress-alb.dns_name
   description = "DNS name of the Load Balancer"
 }
