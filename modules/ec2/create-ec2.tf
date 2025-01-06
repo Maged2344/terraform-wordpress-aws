@@ -10,9 +10,10 @@ resource "aws_launch_template" "maged-wordpress-tf" {
   image_id      = "ami-03558f46c18510eda"
   instance_type = "t2.micro" 
   vpc_security_group_ids = [aws_security_group.maged-wordpress-terraform-sg.id]
+  depends_on = [ aws_instance.private_ec2 ]
   user_data = base64encode(<<-EOF
     #!/bin/bash
-cat > /var/www/html/WordPress/wp-config.php <<WP_EOF
+cat > /var/www/html/wordpress/wp-config.php <<WP_EOF
 <?php
 define( "DB_NAME", "wordpress_db" );
 define( "DB_USER", "wp_user" );
