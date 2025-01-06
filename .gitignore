@@ -1,0 +1,6 @@
+.terraform/
+maged*
+provider.tf
+variables.tf
+terraform.tfvars
+.terraform.lock.hcl
