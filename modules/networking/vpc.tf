@@ -37,33 +37,33 @@ resource "aws_route_table_association" "maged-terraform-route-1b" {
   route_table_id = aws_route_table.maged-terraform-public-route.id
 }
 
-resource "aws_eip" "lb" {
-  domain = "vpc"
-}
+# resource "aws_eip" "lb" {
+#   domain = "vpc"
+# }
 
-resource "aws_nat_gateway" "maged-terraform-nat" {
-  allocation_id = aws_eip.lb.id
-  subnet_id     = aws_subnet.maged-public-subnet-1a.id
-  tags = {
-    Name = "maged-terraform-nat"
-  }
+# resource "aws_nat_gateway" "maged-terraform-nat" {
+#   allocation_id = aws_eip.lb.id
+#   subnet_id     = aws_subnet.maged-public-subnet-1a.id
+#   tags = {
+#     Name = "maged-terraform-nat"
+#   }
 
-}
-# create private route table
+# }
+# # create private route table
 
-resource "aws_route_table" "maged-terraform-route-private" {
-  vpc_id = aws_vpc.maged-terraform-vpc.id
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.maged-terraform-nat.id
-  }
-  tags = {
-    Name = "maged-terraform-route-private"
-  }
-}
+# resource "aws_route_table" "maged-terraform-route-private" {
+#   vpc_id = aws_vpc.maged-terraform-vpc.id
+#   route {
+#     cidr_block     = "0.0.0.0/0"
+#     nat_gateway_id = aws_nat_gateway.maged-terraform-nat.id
+#   }
+#   tags = {
+#     Name = "maged-terraform-route-private"
+#   }
+# }
 
 # create private route-table-association
-resource "aws_route_table_association" "maged-terraform-route-private-1a" {
-  subnet_id      = aws_subnet.maged-private-subnet-1a.id
-  route_table_id = aws_route_table.maged-terraform-route-private.id
-}
+# resource "aws_route_table_association" "maged-terraform-route-private-1a" {
+#   subnet_id      = aws_subnet.maged-private-subnet-1a.id
+#   route_table_id = aws_route_table.maged-terraform-route-private.id
+# }

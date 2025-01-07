@@ -6,52 +6,27 @@ resource "aws_key_pair" "maged-key" {
 
 # Launch Template
 resource "aws_launch_template" "maged-wordpress-tf" {
-  name          = "maged-launch-template"
-  image_id      = "ami-03558f46c18510eda"
-  instance_type = "t2.micro" 
+  name          = var.template-name
+  image_id      = var.template-image
+  instance_type = var.template-instance-type
   vpc_security_group_ids = [aws_security_group.maged-wordpress-terraform-sg.id]
-  user_data = base64encode(<<-EOF
-    #!/bin/bash
-    cd /var/www/html
-    sudo rm -rf /var/www/html/wordpress
-    git clone https://github.com/Maged2344/wordpress.git
-    sudo chown -R www-data:www-data /var/www/html/wordpress
-    sudo chmod -R 775 /var/www/html/wordpress
-    sudo rm -rf /var/www/html/wordpress/wp-config.php
-    sudo bash -c 'cat > /var/www/html/wordpress/wp-config.php <<EOF
-<?php
-define( "DB_NAME", "wordpress_db" );
-define( "DB_USER", "wp_user" );
-define( "DB_PASSWORD", "maged500" );
-define( "DB_HOST", "${var.db_private_ip}" );
-define( "DB_CHARSET", "utf8mb4" );
-define( "DB_COLLATE", "" );
-\$table_prefix  = "wp_";
-if ( !defined("ABSPATH") )
-    define("ABSPATH", dirname(__FILE__) . "/");
-require_once(ABSPATH . "wp-settings.php");
-EOF'
-    nginx -t
-    systemctl daemon-reload
-    systemctl restart nginx
-  EOF
-  )
+
   # Add optional tags
   tags = {
-    Name = "maged-wordpress-template-tf"
+    Name = var.template-tag
   }
 }
 
 # Create Load Balancer
 resource "aws_lb" "maged-wordpress-alb" {
-  name               = "maged-wordpress-alb"
+  name               = var.lb-name
   internal           = false
   load_balancer_type = "application"
   security_groups   = [aws_security_group.maged-wordpress-terraform-sg.id]
   subnets            = [var.subnet_1a_id, var.subnet_1b_id]
   enable_deletion_protection = false
   tags = {
-    Name = "maged-wordpress-alb"
+    Name = var.lb-tag
   }
 }
 # Create Target Group for WordPress
@@ -90,12 +65,11 @@ resource "aws_lb_listener" "maged-wordpress-listener" {
 resource "aws_autoscaling_group" "maged-autoscaling" {
   name                      = "maged-autoscaling"
   vpc_zone_identifier       = [var.subnet_1a_id, var.subnet_1b_id]
-  depends_on = [ aws_instance.private_ec2 ]
   launch_template {
     id      = aws_launch_template.maged-wordpress-tf.id
   }
   min_size                  = 2
-  max_size                  = 2
+  max_size                  = 3
   health_check_grace_period = 200
   health_check_type         = "EC2"
   force_delete              = true
